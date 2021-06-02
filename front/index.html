@@ -86,7 +86,7 @@
 						let param = {};
 						param.method = 'PUT';
 						param.header = { 'content-Type': 'application/json' };
-						//param.body = JSON.stringify(o);
+						param.body = JSON.stringify(o);
 						fetch(url, param)
 							.then(response => response.json())
 							.then(
