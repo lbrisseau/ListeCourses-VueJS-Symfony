@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Courses</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+	<!-- container container-fluid  -->
+	<div id="courses" class="container">
+		<div class="row">
+			<div class="offset-3 col-6">
+				<h1>Liste de courses</h1>
+				<br>
+				<div class="row">
+					<div class="col-6">
+						<input id="item" v-model="title" class="form-control">
+					</div>
+					<div class="col-2">
+						<button id="btn1" @click="add()" class="btn btn-success">
+							<i class="fa fa-plus"></i>
+						</button>
+					</div>
+				</div>
+				<br>
+				<table class="table">
+					<thead>
+						<th>Item</th>
+						<th colspan=2>Action</th>
+					</thead>
+					<tbody id="tab1" v-for="(o, index) in tableau">
+						<tr v-bind:class="{ 'table-danger': isNotBought(o), 'table-success': isBought(o) }">
+							<td>
+								<strike v-if="isBought(o)">{{ o.title }}</strike>
+								<span v-else>{{ o.title }}</span>
+							</td>
+							<td>
+								<button v-if="isNotBought(o)" class="btn btn-primary acheter" @click=buy(o)>
+									<i class="fa fa-check"></i>
+								</button>&nbsp;
+							</td>
+							<td>
+								<button class="ml-auto btn btn-danger del" @click=del(index)>
+									<i class="fa fa-trash"></i>
+								</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+	<script>
+		const app = new Vue(
+			{
+				el: '#courses',
+				data:
+				{
+					tableau: [],
+					title: '',
+				},
+				methods:
+				{
+					isBought(o) {
+						if (o.status == true) {
+							return true;
+						}
+					},
+
+					isNotBought(o) {
+						if (o.status == false) {
+							return true;
+						}
+					},
+
+					buy(o) {
+						o.status = true;
+						// on ajoute ds le tableau
+						let url = 'http://localhost/TP%20VueJS/TP3%20courses/tp/back/public/items/'+ o.id;;
+						let param = {};
+						param.method = 'PUT';
+						param.header = { 'content-Type': 'application/json' };
+						//param.body = JSON.stringify(o);
+						fetch(url, param)
+							.then(response => response.json())
+							.then(
+								info => {
+									console.log(info);
+								});
+						
+					},
+
+					add() {
+						let o = {}; // creation d objet
+						o.title = this.title;
+						o.status = false;
+						this.title = '';
+						// on ajoute ds le tableau
+						let url = 'http://localhost/TP%20VueJS/TP3%20courses/tp/back/public/items/';
+						let param = {};
+						param.method = 'POST';
+						param.header = { 'content-Type': 'application/json' };
+						param.body = JSON.stringify(o);
+						fetch(url, param)
+							.then(response => response.json())
+							.then(
+								info => {
+									console.log(info);
+									o.id = info.id;
+									this.tableau.push(o);
+								});
+					},
+					del(i) {
+						
+						let id = this.tableau[i].id;
+						this.tableau.splice(i, 1);
+						console.log(id);
+						let url = 'http://localhost/TP%20VueJS/TP3%20courses/tp/back/public/items/' + id;
+
+						let param = {};
+						param.method = 'DELETE';
+						param.header = { 'content-Type': 'application/json' };
+
+						fetch(url, param)
+							.then(response => response.json())
+							.then(
+								info => {
+									console.log(info);
+								});
+					}
+				},
+				mounted() {
+					let url = 'http://localhost/TP%20VueJS/TP3%20courses/tp/back/public/items/';
+					fetch(url)
+						.then(response => response.json())
+						.then(
+							tab => {
+								this.tableau = tab;
+							});
+				}
+			});
+	</script>
+
+</body>
+
+</html>
